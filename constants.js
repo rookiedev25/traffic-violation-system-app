@@ -5,8 +5,8 @@ export const CAMERA_DISTANCE_METERS = 1000;
 export const FINE_MAPPING = {
   "2wheeler": 200,
   "4wheeler": 400,
-  bus: 600,
-  truck: 800,
+  "bus": 600,
+  "truck": 800,
 };
 
 // Location speed limits (km/h)

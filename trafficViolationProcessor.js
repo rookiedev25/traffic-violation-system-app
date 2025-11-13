@@ -46,7 +46,7 @@ export const processVehicleViolation = (
 
     // Step 5: Send notification if violated
     if (isViolated) {
-      const message = `Dear user, your ${vehicle.type} was found passing our speed cameras at ${vehicle.location} with a speed of ${report.detectedSpeed} km/h (limit: ${speedLimit} km/h). Please pay the fine amount: ₹${fine}`;
+      const message = `Dear user, your ${vehicle.type} was found passing our speed cameras at ${vehicle.location} with a speed of ${report.detectedSpeed} km/h (limit: ${speedLimit} km/h). Please pay the fine amount: Rs ${fine}`;
       sendNotification(message, "console");
     } else {
       sendNotification(

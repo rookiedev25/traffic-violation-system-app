@@ -13,6 +13,9 @@ export const calculateSpeed = (distanceMeters, timeSeconds) => {
   if (timeSeconds <= 0) {
     throw new Error("Time must be greater than 0");
   }
+  if (distanceMeters <= 0) {
+    throw new Error("Distance must be greater than 0");
+  }
   const speedMeterPerSecond = distanceMeters / timeSeconds;
   const speedKmPerHour = speedMeterPerSecond * 3.6;
   return speedKmPerHour;
