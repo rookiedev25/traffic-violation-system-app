@@ -148,16 +148,22 @@ describe('validationService - Speed Limit Realism', () => {
       expect(isValidOwnerPhone('9876543210')).toBe(true);
     });
 
-    test('should accept valid phone with more than 10 digits', () => {
-      expect(isValidOwnerPhone('919876543210')).toBe(true);
+    test("should reject valid phone with more than 10 digits", () => {
+      expect(isValidOwnerPhone("919876543210")).toBe(false);
     });
 
-    test('should accept phone with formatting and 10+ digits', () => {
-      expect(isValidOwnerPhone('+91-9876543210')).toBe(true);
+    test("should reject phone with formatting that has more than 10 digits", () => {
+      expect(isValidOwnerPhone("+91-9876543210")).toBe(false);
     });
 
-    test('should accept phone with spaces and 10+ digits', () => {
-      expect(isValidOwnerPhone('98 765 432 10')).toBe(true);
+    test("should accept phone with formatting but exactly 10 digits total", () => {
+      expect(isValidOwnerPhone("+91-9876543210".replace("+91-", ""))).toBe(
+        true
+      );
+    });
+
+    test("should accept phone with spaces and exactly 10 digits", () => {
+      expect(isValidOwnerPhone("98 765 432 10")).toBe(true);
     });
 
     test('should reject phone with less than 10 digits', () => {
@@ -184,8 +190,12 @@ describe('validationService - Speed Limit Realism', () => {
       expect(isValidOwnerPhone('')).toBe(false);
     });
 
-    test('should accept phone with mixed alphanumeric but 10+ digits', () => {
-      expect(isValidOwnerPhone('ext9876543210')).toBe(true);
+    test("should accept phone with mixed alphanumeric if exactly 10 digits remain", () => {
+      expect(isValidOwnerPhone("ext9876543210")).toBe(true);
+    });
+
+    test("should reject phone with 11 digits", () => {
+      expect(isValidOwnerPhone("98765432100")).toBe(false);
     });
   });
 
@@ -199,7 +209,7 @@ describe('validationService - Speed Limit Realism', () => {
     test('should return valid=false for phone with less than 10 digits', () => {
       const result = validateOwnerPhone('987654');
       expect(result.isValid).toBe(false);
-      expect(result.message).toContain('at least 10 digits');
+      expect(result.message).toContain("exactly 10 digits");
     });
 
     test('should include digit count in error message', () => {
@@ -207,8 +217,8 @@ describe('validationService - Speed Limit Realism', () => {
       expect(result.message).toContain('Found: 5 digits');
     });
 
-    test('should handle formatted phone correctly', () => {
-      const result = validateOwnerPhone('+91-98 765 432 10');
+    test("should accept phone with exactly 10 digits after formatting removal", () => {
+      const result = validateOwnerPhone("+91-9876543210".replace("+91-", ""));
       expect(result.isValid).toBe(true);
     });
 
@@ -217,8 +227,8 @@ describe('validationService - Speed Limit Realism', () => {
       expect(result.isValid).toBe(false);
     });
 
-    test('should have MIN_PHONE_DIGITS rule', () => {
-      expect(VALIDATION_RULES.MIN_PHONE_DIGITS).toBe(10);
+    test("should have EXACT_PHONE_DIGITS rule", () => {
+      expect(VALIDATION_RULES.EXACT_PHONE_DIGITS).toBe(10);
     });
   });
 });
