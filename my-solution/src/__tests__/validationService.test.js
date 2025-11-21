@@ -7,7 +7,7 @@ import {
 describe('validationService - Speed Limit Realism', () => {
   describe('VALIDATION_RULES', () => {
     test('should have correct speed limit boundaries', () => {
-      expect(VALIDATION_RULES.MIN_REALISTIC_SPEED_LIMIT).toBe(0);
+      expect(VALIDATION_RULES.MIN_REALISTIC_SPEED_LIMIT).toBe(10);
       expect(VALIDATION_RULES.MAX_REALISTIC_SPEED_LIMIT).toBe(200);
     });
   });
@@ -25,12 +25,20 @@ describe('validationService - Speed Limit Realism', () => {
       expect(isSpeedLimitRealistic(200)).toBe(true);
     });
 
-    test('should accept speed limit just above minimum (0.1 km/h)', () => {
-      expect(isSpeedLimitRealistic(0.1)).toBe(true);
+    test('should accept speed limit just above minimum (10 km/h)', () => {
+      expect(isSpeedLimitRealistic(10)).toBe(true);
     });
 
-    test('should reject 0 km/h speed limit', () => {
-      expect(isSpeedLimitRealistic(0)).toBe(false);
+    test('should reject single-digit speed limit (9 km/h)', () => {
+      expect(isSpeedLimitRealistic(9)).toBe(false);
+    });
+
+    test('should reject single-digit speed limit (5 km/h)', () => {
+      expect(isSpeedLimitRealistic(5)).toBe(false);
+    });
+
+    test('should reject single-digit speed limit (1 km/h)', () => {
+      expect(isSpeedLimitRealistic(1)).toBe(false);
     });
 
     test('should reject negative speed limits (-50 km/h)', () => {
@@ -69,7 +77,7 @@ describe('validationService - Speed Limit Realism', () => {
       const result = validateSpeedLimitRealism({ speedLimit: 0 });
       expect(result.isRealistic).toBe(false);
       expect(result.message).toContain('unrealistic');
-      expect(result.message).toContain('0-200');
+      expect(result.message).toContain('10-200');
     });
 
     test('should return realistic=false for negative speed limit', () => {
@@ -82,7 +90,7 @@ describe('validationService - Speed Limit Realism', () => {
       const result = validateSpeedLimitRealism({ speedLimit: 250 });
       expect(result.isRealistic).toBe(false);
       expect(result.message).toContain('unrealistic');
-      expect(result.message).toContain('0-200');
+      expect(result.message).toContain('10-200');
     });
 
     test('should return realistic=false for extremely unrealistic speed limit (1000 km/h)', () => {
@@ -94,6 +102,18 @@ describe('validationService - Speed Limit Realism', () => {
     test('should include speed limit value in error message', () => {
       const result = validateSpeedLimitRealism({ speedLimit: 300 });
       expect(result.message).toContain('300');
+    });
+
+    test('should reject single-digit speed limits (1 km/h)', () => {
+      const result = validateSpeedLimitRealism({ speedLimit: 1 });
+      expect(result.isRealistic).toBe(false);
+      expect(result.message).toContain('single-digit');
+    });
+
+    test('should reject single-digit speed limits (9 km/h)', () => {
+      const result = validateSpeedLimitRealism({ speedLimit: 9 });
+      expect(result.isRealistic).toBe(false);
+      expect(result.message).toContain('single-digit');
     });
   });
 
@@ -112,8 +132,12 @@ describe('validationService - Speed Limit Realism', () => {
       expect(isSpeedLimitRealistic(95.5)).toBe(true);
     });
 
-    test('should accept very small but positive speed limits (0.001 km/h)', () => {
-      expect(isSpeedLimitRealistic(0.001)).toBe(true);
+    test('should reject very small speed limits (0.001 km/h - single digit)', () => {
+      expect(isSpeedLimitRealistic(0.001)).toBe(false);
+    });
+
+    test('should accept speed limit of exactly 10 km/h (minimum)', () => {
+      expect(isSpeedLimitRealistic(10)).toBe(true);
     });
   });
 });
