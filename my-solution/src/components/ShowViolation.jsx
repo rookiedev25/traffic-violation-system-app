@@ -170,7 +170,7 @@ const ShowViolation = () => {
                               : "bg-emerald-50 text-emerald-700"
                           }`}
                         >
-                          {hasInvalidPhone ? "❌ INVALID PHONE" : hasUnrealisticLimit ? "⚠️ UNREALISTIC LIMIT" : reportItem.status}
+                          {hasInvalidPhone ? "❌ INVALID PHONE" : hasUnrealisticLimit ? "UNREALISTIC LIMIT" : reportItem.status}
                         </span>
                       </div>
 
@@ -207,7 +207,7 @@ const ShowViolation = () => {
                                 : "Send SMS alert"
                             }
                           >
-                            📨 Send Message
+                            Send Message
                           </button>
                         </div>
                       ) : null}
