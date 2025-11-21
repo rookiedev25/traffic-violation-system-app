@@ -14,6 +14,7 @@ export const FINE_ASSOCIATION = {
 // SpeedLimit mockAPI 
 export const ALLOWED_SPEED_LIMIT = [
   { location: "Wakad", limit: 80 },
+  {location: "Pune", limit: 22},
   { location: "Hinjewadi", limit: 120 },
   { location: "Aundh", limit: 70 },
   { location: "Viman Nagar", limit: 85 },

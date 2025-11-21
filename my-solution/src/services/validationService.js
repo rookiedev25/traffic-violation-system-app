@@ -1,206 +1,52 @@
 /**
  * Validation Service
- * Handles all data validation with business rules
+ * Handles speed limit realism validation
+ * If speed limit is unrealistic, no fine should be calculated
  */
 
-import { ALLOWED_SPEED_LIMIT } from '../data/constants.js';
-
-// Validation constraints
+// Speed limit validation rules
 export const VALIDATION_RULES = {
-  MIN_SPEED_LIMIT: 20,              // Minimum realistic speed (residential)
-  MAX_SPEED_LIMIT: 150,             // Maximum realistic speed (highway)
-  MAX_REALISTIC_VEHICLE_SPEED: 300, // No vehicle should exceed this
-  VALID_VEHICLE_TYPES: ['2wheeler', '4wheeler', 'bus', 'truck'],
+  MIN_REALISTIC_SPEED_LIMIT: 0,      // Must be greater than 0
+  MAX_REALISTIC_SPEED_LIMIT: 200,    // Must not exceed 200 km/h
 };
 
 /**
- * Validates a location against database
- * @param {string} location - Location name
- * @returns {boolean} - True if valid
- * @throws {Error} - If location is invalid
- */
-export const validateLocation = (location) => {
-  if (!location || typeof location !== 'string') {
-    throw new Error('Location must be a non-empty string');
-  }
-
-  const validLocations = ALLOWED_SPEED_LIMIT.map(item => item.location);
-  const isValid = validLocations.some(
-    loc => loc.toLowerCase() === location.toLowerCase()
-  );
-
-  if (!isValid) {
-    throw new Error(
-      `Invalid location: "${location}". Valid locations are: ${validLocations.join(', ')}`
-    );
-  }
-
-  return true;
-};
-
-/**
- * Validates speed limit value
+ * Checks if a speed limit is realistic
+ * Speed limit should not be: 0, negative, or > 200 km/h
  * @param {number} speedLimit - Speed limit in km/h
- * @returns {boolean} - True if valid
- * @throws {Error} - If speed limit is invalid
+ * @returns {boolean} - True if speed limit is realistic
  */
-export const validateSpeedLimit = (speedLimit) => {
-  if (typeof speedLimit !== 'number' || speedLimit < 0) {
-    throw new Error('Speed limit must be a positive number');
+export const isSpeedLimitRealistic = (speedLimit) => {
+  // Must be a positive number
+  if (typeof speedLimit !== 'number' || speedLimit <= VALIDATION_RULES.MIN_REALISTIC_SPEED_LIMIT) {
+    return false;
   }
 
-  if (speedLimit < VALIDATION_RULES.MIN_SPEED_LIMIT) {
-    throw new Error(
-      `Speed limit ${speedLimit} km/h is too low. Minimum realistic: ${VALIDATION_RULES.MIN_SPEED_LIMIT} km/h`
-    );
-  }
-
-  if (speedLimit > VALIDATION_RULES.MAX_SPEED_LIMIT) {
-    throw new Error(
-      `Speed limit ${speedLimit} km/h is unrealistic. Maximum: ${VALIDATION_RULES.MAX_SPEED_LIMIT} km/h`
-    );
+  // Must not exceed maximum realistic value
+  if (speedLimit > VALIDATION_RULES.MAX_REALISTIC_SPEED_LIMIT) {
+    return false;
   }
 
   return true;
 };
 
 /**
- * Validates vehicle speed
- * @param {number} vehicleSpeed - Actual vehicle speed in km/h
- * @returns {boolean} - True if valid
- * @throws {Error} - If vehicle speed is invalid
- */
-export const validateVehicleSpeed = (vehicleSpeed) => {
-  if (typeof vehicleSpeed !== 'number' || vehicleSpeed < 0) {
-    throw new Error('Vehicle speed must be a positive number');
-  }
-
-  if (vehicleSpeed > VALIDATION_RULES.MAX_REALISTIC_VEHICLE_SPEED) {
-    throw new Error(
-      `Vehicle speed ${vehicleSpeed} km/h is unrealistic. Maximum realistic: ${VALIDATION_RULES.MAX_REALISTIC_VEHICLE_SPEED} km/h`
-    );
-  }
-
-  return true;
-};
-
-/**
- * Validates vehicle type
- * @param {string} vehicleType - Type of vehicle
- * @returns {boolean} - True if valid
- * @throws {Error} - If vehicle type is invalid
- */
-export const validateVehicleType = (vehicleType) => {
-  if (!vehicleType || typeof vehicleType !== 'string') {
-    throw new Error('Vehicle type must be a non-empty string');
-  }
-
-  const isValid = VALIDATION_RULES.VALID_VEHICLE_TYPES.some(
-    type => type.toLowerCase() === vehicleType.toLowerCase()
-  );
-
-  if (!isValid) {
-    throw new Error(
-      `Invalid vehicle type: "${vehicleType}". Valid types: ${VALIDATION_RULES.VALID_VEHICLE_TYPES.join(', ')}`
-    );
-  }
-
-  return true;
-};
-
-/**
- * Validates complete violation report
+ * Gets validation status for a violation report
  * @param {object} report - Violation report object
- * @returns {object} - Validation result { isValid: boolean, errors: [] }
+ * @returns {object} - { isRealistic: boolean, message: string }
  */
-export const validateViolationReport = (report) => {
-  const errors = [];
+export const validateSpeedLimitRealism = (report) => {
+  const isRealistic = isSpeedLimitRealistic(report.speedLimit);
 
-  try {
-    validateLocation(report.location);
-  } catch (error) {
-    errors.push(error.message);
-  }
-
-  try {
-    validateSpeedLimit(report.speedLimit);
-  } catch (error) {
-    errors.push(error.message);
-  }
-
-  try {
-    validateVehicleSpeed(report.calculatedSpeed);
-  } catch (error) {
-    errors.push(error.message);
-  }
-
-  try {
-    validateVehicleType(report.vehicleType);
-  } catch (error) {
-    errors.push(error.message);
-  }
-
-  // Additional logical validations
-  if (report.calculatedSpeed < report.speedLimit && report.isViolated === true) {
-    errors.push(
-      `Logic error: Vehicle speed (${report.calculatedSpeed}) is less than limit (${report.speedLimit}), but violation is marked as true`
-    );
+  if (!isRealistic) {
+    return {
+      isRealistic: false,
+      message: `Speed limit ${report.speedLimit} km/h is unrealistic (must be between 0-200 km/h). Fine calculation disabled.`,
+    };
   }
 
   return {
-    isValid: errors.length === 0,
-    errors,
-    warnings: generateWarnings(report),
+    isRealistic: true,
+    message: null,
   };
-};
-
-/**
- * Generates warnings for potentially problematic but valid data
- * @param {object} report - Violation report object
- * @returns {array} - Array of warning messages
- */
-const generateWarnings = (report) => {
-  const warnings = [];
-
-  // Speed difference is too high (indicates potential data entry error)
-  if (report.speedDifference > 100) {
-    warnings.push(
-      `⚠️ Extremely high speed difference (${report.speedDifference} km/h). Verify data entry.`
-    );
-  }
-
-  // Speed very close to limit (could be calibration issue)
-  if (Math.abs(report.speedDifference) < 1 && report.isViolated === true) {
-    warnings.push(
-      `⚠️ Speed very close to limit (${report.speedDifference} km/h difference). Consider calibration check.`
-    );
-  }
-
-  return warnings;
-};
-
-/**
- * Gets a human-readable validation message
- * @param {object} validationResult - Result from validateViolationReport
- * @returns {string} - Message for UI display
- */
-export const getValidationMessage = (validationResult) => {
-  if (validationResult.isValid && validationResult.warnings.length === 0) {
-    return 'All validations passed ✅';
-  }
-
-  let message = '';
-
-  if (validationResult.errors.length > 0) {
-    message += '❌ Errors:\n';
-    message += validationResult.errors.map(e => `• ${e}`).join('\n');
-  }
-
-  if (validationResult.warnings.length > 0) {
-    if (message) message += '\n\n';
-    message += '⚠️ Warnings:\n';
-    message += validationResult.warnings.map(w => `• ${w}`).join('\n');
-  }
-
-  return message;
 };

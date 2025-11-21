@@ -5,6 +5,7 @@ import { calculateSpeedFromTimestamps } from "./speedCalculatorService";
 import { getSpeedLimit } from "./speedLimitService";
 import { checkViolation } from "./violationDetectorService";
 import { calculateFine } from "./fineCalculatorService";
+import { validateSpeedLimitRealism } from "./validationService";
 
 // output to be pushed here
 import { addViolationRecord } from "../data/reportViolationDatabase";
@@ -26,11 +27,21 @@ export const processSingleVehicle = (vehicleRecord) => {
     // check for any violation
     const violationStatus = checkViolation(actualSpeed, speedLimit);
 
-    // calculation of fine amount
-    const calculatedFineAmount = calculateFine(
-      vehicleRecord.vehicleType,
-      violationStatus.isViolated
-    );
+    // Check if speed limit is realistic
+    const speedLimitValidation = validateSpeedLimitRealism({ speedLimit });
+
+    // Calculate fine only if speed limit is realistic
+    let calculatedFineAmount = 0;
+    let hasUnrealisticSpeedLimit = false;
+
+    if (speedLimitValidation.isRealistic) {
+      calculatedFineAmount = calculateFine(
+        vehicleRecord.vehicleType,
+        violationStatus.isViolated
+      );
+    } else {
+      hasUnrealisticSpeedLimit = true;
+    }
 
     // Build report object
     const report = {
@@ -45,6 +56,8 @@ export const processSingleVehicle = (vehicleRecord) => {
       fineAmount: calculatedFineAmount,
       status: violationStatus.isViolated ? "VIOLATION" : "COMPLIANT",
       processedAt: new Date().toISOString(),
+      hasUnrealisticSpeedLimit: hasUnrealisticSpeedLimit,
+      unrealisticSpeedLimitMessage: speedLimitValidation.message,
     };
 
     // push into output DB
