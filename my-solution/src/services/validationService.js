@@ -8,17 +8,12 @@
 export const VALIDATION_RULES = {
   MIN_REALISTIC_SPEED_LIMIT: 10,     // Must be at least 10 km/h (not single-digit)
   MAX_REALISTIC_SPEED_LIMIT: 200,    // Must not exceed 200 km/h
+  MIN_PHONE_DIGITS: 10,              // Phone number must have at least 10 digits
 };
 
-/**
- * Checks if a speed limit is realistic
- * Speed limit should not be: single-digit (< 10), or > 200 km/h
- * @param {number} speedLimit - Speed limit in km/h
- * @returns {boolean} - True if speed limit is realistic
- */
 export const isSpeedLimitRealistic = (speedLimit) => {
   // Must be a number
-  if (typeof speedLimit !== 'number') {
+  if (typeof speedLimit !== "number") {
     return false;
   }
 
@@ -35,11 +30,6 @@ export const isSpeedLimitRealistic = (speedLimit) => {
   return true;
 };
 
-/**
- * Gets validation status for a violation report
- * @param {object} report - Violation report object
- * @returns {object} - { isRealistic: boolean, message: string }
- */
 export const validateSpeedLimitRealism = (report) => {
   const isRealistic = isSpeedLimitRealistic(report.speedLimit);
 
@@ -52,6 +42,51 @@ export const validateSpeedLimitRealism = (report) => {
 
   return {
     isRealistic: true,
+    message: null,
+  };
+};
+
+/**
+ * Validates owner phone number
+ * Phone must contain at least 10 digits
+ * @param {string} phone - Phone number
+ * @returns {boolean} - True if phone is valid
+ */
+export const isValidOwnerPhone = (phone) => {
+  // Must be a string
+  if (typeof phone !== 'string') {
+    return false;
+  }
+
+  // Extract only digits from phone number
+  const digitsOnly = phone.replace(/\D/g, '');
+
+  // Must have at least 10 digits
+  if (digitsOnly.length < VALIDATION_RULES.MIN_PHONE_DIGITS) {
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * Gets validation status for phone number
+ * @param {string} phone - Phone number to validate
+ * @returns {object} - { isValid: boolean, message: string }
+ */
+export const validateOwnerPhone = (phone) => {
+  const isValid = isValidOwnerPhone(phone);
+
+  if (!isValid) {
+    const digitsOnly = typeof phone === 'string' ? phone.replace(/\D/g, '').length : 0;
+    return {
+      isValid: false,
+      message: `Phone number must contain at least ${VALIDATION_RULES.MIN_PHONE_DIGITS} digits. Found: ${digitsOnly} digits.`,
+    };
+  }
+
+  return {
+    isValid: true,
     message: null,
   };
 };

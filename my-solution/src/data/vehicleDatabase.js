@@ -3,7 +3,7 @@ export const vehicleDatabase = [
   {
     vehicleID: "MH-12-AB-4521",
     vehicleType: "4wheeler",
-    ownerPhone: "9823105472",
+    ownerPhone: "12",
     location: "Hinjewadi",
     cameraCapture: {
       timeStamp1: new Date("2025-11-14T08:15:00Z"),

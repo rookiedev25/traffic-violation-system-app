@@ -1,6 +1,8 @@
 import {
   isSpeedLimitRealistic,
   validateSpeedLimitRealism,
+  isValidOwnerPhone,
+  validateOwnerPhone,
   VALIDATION_RULES,
 } from '../services/validationService';
 
@@ -138,6 +140,85 @@ describe('validationService - Speed Limit Realism', () => {
 
     test('should accept speed limit of exactly 10 km/h (minimum)', () => {
       expect(isSpeedLimitRealistic(10)).toBe(true);
+    });
+  });
+
+  describe('isValidOwnerPhone', () => {
+    test('should accept valid phone with exactly 10 digits', () => {
+      expect(isValidOwnerPhone('9876543210')).toBe(true);
+    });
+
+    test('should accept valid phone with more than 10 digits', () => {
+      expect(isValidOwnerPhone('919876543210')).toBe(true);
+    });
+
+    test('should accept phone with formatting and 10+ digits', () => {
+      expect(isValidOwnerPhone('+91-9876543210')).toBe(true);
+    });
+
+    test('should accept phone with spaces and 10+ digits', () => {
+      expect(isValidOwnerPhone('98 765 432 10')).toBe(true);
+    });
+
+    test('should reject phone with less than 10 digits', () => {
+      expect(isValidOwnerPhone('9876543')).toBe(false);
+    });
+
+    test('should reject phone with exactly 9 digits', () => {
+      expect(isValidOwnerPhone('987654321')).toBe(false);
+    });
+
+    test('should reject non-string phone', () => {
+      expect(isValidOwnerPhone(9876543210)).toBe(false);
+    });
+
+    test('should reject null phone', () => {
+      expect(isValidOwnerPhone(null)).toBe(false);
+    });
+
+    test('should reject undefined phone', () => {
+      expect(isValidOwnerPhone(undefined)).toBe(false);
+    });
+
+    test('should reject empty string phone', () => {
+      expect(isValidOwnerPhone('')).toBe(false);
+    });
+
+    test('should accept phone with mixed alphanumeric but 10+ digits', () => {
+      expect(isValidOwnerPhone('ext9876543210')).toBe(true);
+    });
+  });
+
+  describe('validateOwnerPhone', () => {
+    test('should return valid=true for 10-digit phone', () => {
+      const result = validateOwnerPhone('9876543210');
+      expect(result.isValid).toBe(true);
+      expect(result.message).toBeNull();
+    });
+
+    test('should return valid=false for phone with less than 10 digits', () => {
+      const result = validateOwnerPhone('987654');
+      expect(result.isValid).toBe(false);
+      expect(result.message).toContain('at least 10 digits');
+    });
+
+    test('should include digit count in error message', () => {
+      const result = validateOwnerPhone('98765');
+      expect(result.message).toContain('Found: 5 digits');
+    });
+
+    test('should handle formatted phone correctly', () => {
+      const result = validateOwnerPhone('+91-98 765 432 10');
+      expect(result.isValid).toBe(true);
+    });
+
+    test('should return valid=false for non-string phone', () => {
+      const result = validateOwnerPhone(9876543210);
+      expect(result.isValid).toBe(false);
+    });
+
+    test('should have MIN_PHONE_DIGITS rule', () => {
+      expect(VALIDATION_RULES.MIN_PHONE_DIGITS).toBe(10);
     });
   });
 });

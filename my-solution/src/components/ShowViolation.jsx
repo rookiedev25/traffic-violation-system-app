@@ -20,6 +20,11 @@ const ShowViolation = () => {
   }, []);
 
   const handleSendMessage = (reportItem) => {
+    if (reportItem.hasInvalidPhone) {
+      alert(`Cannot send SMS - ${reportItem.invalidPhoneMessage}`);
+      return;
+    }
+
     if (reportItem.hasUnrealisticSpeedLimit) {
       alert(`Cannot send SMS - ${reportItem.unrealisticSpeedLimitMessage}`);
       return;
@@ -113,12 +118,13 @@ const ShowViolation = () => {
                 {results.map((reportItem) => {
                   const violated = reportItem.isViolated;
                   const hasUnrealisticLimit = reportItem.hasUnrealisticSpeedLimit;
+                  const hasInvalidPhone = reportItem.hasInvalidPhone;
 
                   return (
                     <div
                       key={reportItem.vehicleID}
                       className={`flex flex-col p-4 rounded-lg bg-white shadow-sm border-l-4 ${
-                        hasUnrealisticLimit
+                        hasInvalidPhone || hasUnrealisticLimit
                           ? "border-orange-400"
                           : violated
                           ? "border-red-400"
@@ -136,6 +142,17 @@ const ShowViolation = () => {
                         </div>
                       )}
 
+                      {hasInvalidPhone && (
+                        <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded">
+                          <p className="text-xs font-semibold text-red-800 mb-1">
+                            ❌ Invalid Phone Number:
+                          </p>
+                          <p className="text-xs text-red-700">
+                            {reportItem.invalidPhoneMessage}
+                          </p>
+                        </div>
+                      )}
+
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <p className="text-sm text-gray-500">Vehicle</p>
@@ -146,14 +163,14 @@ const ShowViolation = () => {
 
                         <span
                           className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${
-                            hasUnrealisticLimit
-                              ? "bg-orange-50 text-orange-700"
+                            hasInvalidPhone || hasUnrealisticLimit
+                              ? "bg-red-50 text-red-700"
                               : violated
                               ? "bg-red-50 text-red-700"
                               : "bg-emerald-50 text-emerald-700"
                           }`}
                         >
-                          {hasUnrealisticLimit ? "⚠️ UNREALISTIC LIMIT" : reportItem.status}
+                          {hasInvalidPhone ? "❌ INVALID PHONE" : hasUnrealisticLimit ? "⚠️ UNREALISTIC LIMIT" : reportItem.status}
                         </span>
                       </div>
 
@@ -176,14 +193,16 @@ const ShowViolation = () => {
                         <div className="flex justify-end gap-2">
                           <button
                             onClick={() => handleSendMessage(reportItem)}
-                            disabled={hasUnrealisticLimit}
+                            disabled={hasUnrealisticLimit || hasInvalidPhone}
                             className={`px-3 py-1 rounded-md text-sm font-medium transition cursor-pointer ${
-                              hasUnrealisticLimit
+                              hasUnrealisticLimit || hasInvalidPhone
                                 ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                                 : "bg-blue-50 text-blue-700 hover:bg-blue-100"
                             }`}
                             title={
-                              hasUnrealisticLimit
+                              hasInvalidPhone
+                                ? "Cannot send SMS - Invalid phone number"
+                                : hasUnrealisticLimit
                                 ? "Cannot send SMS - Unrealistic speed limit"
                                 : "Send SMS alert"
                             }
