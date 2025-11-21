@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# some other files
+SMS_INTEGRATION_GUIDE.md
+SMS_REVIEW_SUMMARY.md
+SMS_SERVICE_REVIEW.md
+TEST_RESULTS.md
+VALIDATION_*.md
