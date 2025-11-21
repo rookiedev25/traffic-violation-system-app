@@ -4,7 +4,7 @@ export const vehicleDatabase = [
     vehicleID: "MH-12-AB-4521",
     vehicleType: "4wheeler",
     ownerPhone: "9823105472",
-    location: "Baner",
+    location: "Hinjewadi",
     cameraCapture: {
       timeStamp1: new Date("2025-11-14T08:15:00Z"),
       timeStamp2: new Date("2025-11-14T08:15:22Z"), // 22 seconds
@@ -24,7 +24,7 @@ export const vehicleDatabase = [
     vehicleID: "MH-12-RT-7781",
     vehicleType: "bus",
     ownerPhone: "9765521098",
-    location: "Kothrud",
+    location: "Yerwada",
     cameraCapture: {
       timeStamp1: new Date("2025-11-14T08:25:00Z"),
       timeStamp2: new Date("2025-11-14T08:26:05Z"), // 65 seconds
@@ -42,7 +42,7 @@ export const vehicleDatabase = [
   },
   {
     vehicleID: "MH-14-QW-2245",
-    vehicleType: "auto",
+    vehicleType: "4wheeler",
     ownerPhone: "9012347765",
     location: "Aundh",
     cameraCapture: {

@@ -3,7 +3,7 @@
 // 1. Fetching speed limit from constants.js - fallback for API not working scenarios
 // 2. Fetch from API - for real data from JSON object fetch()
 
-import { ALLOWED_SPEED_LIMIT, API_CONFIG } from "../data/constants";
+import { ALLOWED_SPEED_LIMIT } from "../data/constants";
 
 export const getSpeedLimit = (location) => {
   // check for valid location details

@@ -35,6 +35,7 @@ export const processSingleVehicle = (vehicleRecord) => {
     // Build report object
     const report = {
       vehicleID: vehicleRecord.vehicleID,
+      ownerPhone: vehicleRecord.ownerPhone,
       vehicleType: vehicleRecord.vehicleType,
       location: vehicleRecord.location,
       calculatedSpeed: actualSpeed,
